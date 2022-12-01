@@ -1,5 +1,5 @@
 import weaviate
-from app.configs.constants import CONFIG_FILE
+from app.configs.constants import CONFIG
 
 
 class Weaviate:
@@ -11,7 +11,8 @@ class Weaviate:
             client: waviate client
         """
         try:
-            waviate_client = weaviate.client(CONFIG_FILE["CLUSTER_URL"])
+
+            waviate_client = weaviate.Client(CONFIG["CLUSTER_URL"])
             print("Successfully created weaviate client")
             return waviate_client
         except Exception as e:
