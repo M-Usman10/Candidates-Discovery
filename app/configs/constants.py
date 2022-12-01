@@ -1,4 +1,5 @@
 import json
 
-CONFIG_FILE = "configurations.json"
-CONFIG = json.load(open(CONFIG_FILE, "r"))
+CONFIG_FILE = "/Users/usman/PycharmProjects/TEST-WEAVIATE/configurations.json"
+with open(CONFIG_FILE) as file:
+    CONFIG = json.load(file)
