@@ -1,10 +1,8 @@
 from fastapi import APIRouter
 from app.core.adapters.weaiate import Weaviate
 from app.configs.constants import CANDIDATE_FEATURES
-from datetime import datetime
 
 search_router = APIRouter()
-
 
 @search_router.post("/search", response_model=dict)
 def search_db(near_text_filter: dict):

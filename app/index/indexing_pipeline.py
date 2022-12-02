@@ -1,10 +1,7 @@
-import weaviate
-import json
-
 from app.core.adapters.weaiate import Weaviate
 from .dataloader import Data
 from app.configs.constants import CANDIDATE_FEATURES
-from .vector_encoder import model as vector_encoder
+from app.index.vector_encoder import model as vector_encoder
 import uuid
 class Pipeline:
     """
@@ -19,6 +16,16 @@ class Pipeline:
         schema = {
             "class": "Candidate",
                 "description": "Linkedin Profile for a Candidate",
+            "moduleConfig": {
+                "text2vec-huggingface": {
+                    "model": "sentence-transformers/multi-qa-MiniLM-L6-cos-v1",
+                    "options": {
+                        "waitForModel": True,
+                        "useGPU": True,
+                        "useCache": True
+                    }
+                }
+            },
                 "properties": [
                     {
                         "dataType": [
@@ -38,7 +45,7 @@ class Pipeline:
             return 0
         except Exception as e:
             print(e)
-            print("Could not create the schema")
+            print("Could not create the schema",e)
             return -1
 
 
@@ -70,8 +77,8 @@ class Pipeline:
                 encoded_candidate = self.encode_candidate(candidate)
                 vector = vector_encoder.encode(encoded_candidate['about'])
                 print(encoded_candidate,vector)
-
-                weaviate_client.batch.add_data_object(encoded_candidate,"Candidate",uuid.uuid4(),vector)
+                status = weaviate_client.batch.add_data_object(encoded_candidate,"Candidate",uuid.uuid4(),vector)
+                print(status)
                 break
         return 0
 
@@ -86,18 +93,18 @@ class Pipeline:
             # Filter out features that are not required to be indexed
             if feature_id in CANDIDATE_FEATURES.keys():
                 if isinstance(CANDIDATE_FEATURES[feature_id], str):
-                    encoded_candidate[feature_id] = candidate[feature_id]
+                    encoded_candidate[feature_id] = str(candidate[feature_id])
                 # When feature can contain multiple values, like a cnadidate can have more than one job experiences
                 elif isinstance(CANDIDATE_FEATURES[feature_id], list):
                     encoded_candidate[feature_id] = ''
                     for feature_detail in feature_values:
                         for element_to_select in CANDIDATE_FEATURES[feature_id]:
                             if isinstance(CANDIDATE_FEATURES[feature_id][0],str):
-                                encoded_candidate[feature_id] += ", "+feature_detail[element_to_select]
+                                encoded_candidate[feature_id] += ", "+str(feature_detail[element_to_select])
                             else:
                                 for top_level_element,element_to_select in CANDIDATE_FEATURES[feature_id][0].items():
                                     for feature_detail_refined in feature_detail[top_level_element]:
-                                        encoded_candidate[feature_id] += ", "+feature_detail_refined[element_to_select]
+                                        encoded_candidate[feature_id] += ", "+str(feature_detail_refined[element_to_select])
                 elif isinstance(CANDIDATE_FEATURES[feature_id],dict): # Current company is a dictionary
                     element_to_select = list(CANDIDATE_FEATURES[feature_id].keys())[0]
                     encoded_candidate[feature_id] = feature_values[element_to_select]

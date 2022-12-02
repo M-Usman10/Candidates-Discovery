@@ -3,7 +3,7 @@ from app.index.indexing_pipeline import Pipeline
 insert_data_router = APIRouter()
 
 
-@insert_data_router.post("/insert_data", response_model=str)
+@insert_data_router.post("/insert", response_model=str)
 def insert_data(file: UploadFile = File(...)):
     try:
         contents = file.file.read()
