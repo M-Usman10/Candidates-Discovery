@@ -41,9 +41,9 @@ Next from project's root folder install the required dependencies:
 
 
 
-For Linux OS:
+
 ```bash
-make install
+pip install -r requirements
 ```
 
 Run the live server
